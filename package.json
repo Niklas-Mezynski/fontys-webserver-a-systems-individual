@@ -1,5 +1,5 @@
 {
-  "name": "t3-app-1",
+  "name": "a-systems-webserver",
   "version": "1.0.0",
   "description": "Starter project for ExpressJS with React + Vite using tRPC",
   "main": "index.js",
@@ -17,6 +17,6 @@
     "tRPC",
     "typescript"
   ],
-  "author": "Truly Mittal <trulymittal@gmail.com> (https://www.trulymittal.com/)",
+  "author": "Niklas Mezynski",
   "license": "ISC"
 }
