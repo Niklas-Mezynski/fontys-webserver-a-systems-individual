@@ -1,23 +1,17 @@
-import express, { Application, NextFunction, Request, Response } from "express";
-import * as trpcExpress from "@trpc/server/adapters/express";
-import { appRouter } from "./router";
-import cors from "cors";
-import { createContext } from "./lib/trpc";
-import * as dotenv from "dotenv";
-
-dotenv.config({
-  path: "../.env",
+require('dotenv').config({
+  path: __dirname + '/../.env',
 });
+import * as trpcExpress from '@trpc/server/adapters/express';
+import cors from 'cors';
+import express, { Application } from 'express';
+import { createContext } from './lib/trpc';
+import { appRouter } from './router';
 
 const app: Application = express();
 app.use(cors());
 
-// app.get('/', (req: Request, res: Response, next: NextFunction) => {
-//   res.json({ message: 'Hello world!' })
-// })
-
 app.use(
-  "/trpc",
+  '/trpc',
   trpcExpress.createExpressMiddleware({
     router: appRouter,
     createContext: createContext,

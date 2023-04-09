@@ -1,7 +1,17 @@
-import { pgTable, serial, varchar } from "drizzle-orm/pg-core";
+import {
+  integer,
+  numeric,
+  pgTable,
+  serial,
+  timestamp,
+} from 'drizzle-orm/pg-core';
 
-export const sensorData = pgTable("sensor_data", {
-  id: serial("id").primaryKey(),
-  name: varchar("name", { length: 256 }),
-  //   countryId: integer("country_id").references(() => countries.id),
+export const sensorData = pgTable('sensor_data', {
+  id: serial('id').primaryKey(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  rawValue: integer('raw_value').notNull(),
+  humidity: numeric('humidity', {
+    precision: 6,
+    scale: 3,
+  }).notNull(),
 });

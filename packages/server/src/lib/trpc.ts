@@ -1,5 +1,5 @@
-import { inferAsyncReturnType, initTRPC, TRPCError } from "@trpc/server";
-import * as trpcExpress from "@trpc/server/adapters/express";
+import { inferAsyncReturnType, initTRPC, TRPCError } from '@trpc/server';
+import * as trpcExpress from '@trpc/server/adapters/express';
 
 export const createContext = ({
   req,
@@ -9,7 +9,7 @@ export const createContext = ({
   const token = req.headers.authorization;
   // Validate token
   // Get the user
-  const user = "Truly";
+  const user = 'Truly';
 
   const noUser = undefined;
 
