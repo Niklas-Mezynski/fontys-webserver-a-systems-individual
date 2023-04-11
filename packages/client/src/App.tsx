@@ -7,12 +7,14 @@ import ListTodos from './components/ListTodos';
 import { trpc } from './lib/trpc';
 
 function App() {
+  console.log(import.meta.env);
+
   const [queryClient] = useState(() => new QueryClient());
   const [trpcClient] = useState(() => {
     return trpc.createClient({
       links: [
         httpBatchLink({
-          url: 'http://localhost:3002/trpc',
+          url: import.meta.env.VITE_API_URL,
         }),
       ],
     });
