@@ -2,9 +2,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { httpBatchLink } from '@trpc/client';
 import { useState } from 'react';
 import './App.css';
-import expressLogo from './assets/express.png';
-import reactLogo from './assets/react.svg';
-import tRpcLogo from './assets/trpc.svg';
 import AddTodo from './components/AddTodo';
 import ListTodos from './components/ListTodos';
 import { trpc } from './lib/trpc';
@@ -15,7 +12,7 @@ function App() {
     return trpc.createClient({
       links: [
         httpBatchLink({
-          url: 'http://localhost:3000/trpc',
+          url: 'http://localhost:3002/trpc',
         }),
       ],
     });
