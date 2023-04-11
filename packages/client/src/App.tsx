@@ -7,8 +7,6 @@ import ListTodos from './components/ListTodos';
 import { trpc } from './lib/trpc';
 
 function App() {
-  console.log(import.meta.env);
-
   const [queryClient] = useState(() => new QueryClient());
   const [trpcClient] = useState(() => {
     return trpc.createClient({
