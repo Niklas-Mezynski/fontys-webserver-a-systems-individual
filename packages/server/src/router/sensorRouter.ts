@@ -1,18 +1,43 @@
-import { trpc } from '../lib/trpc';
+import { desc } from 'drizzle-orm/expressions';
 import { z } from 'zod';
 import { db } from '../db/db';
 import { sensorData } from '../db/schema/sensor.data';
+import { trpc } from '../lib/trpc';
 
 export const sensorRouter = trpc.router({
-  getSensorData: trpc.procedure.query(async ({ ctx }) => {
-    // console.log(ctx.user);
-    const data = await db.select().from(sensorData);
-    return data;
-  }),
+  getSensorData: trpc.procedure
+    .input(
+      z
+        .object({
+          limit: z.number().int().optional(),
+        })
+        .optional()
+    )
+    .query(async ({ input }) => {
+      const query = db
+        .select()
+        .from(sensorData)
+        .orderBy(desc(sensorData.createdAt));
+      if (input?.limit) {
+        query.limit(input?.limit);
+      }
+      return query;
+    }),
   addSensorData: trpc.procedure
-    .input(z.object({ rawValue: z.number(), humidity: z.number() }))
-    .mutation(({ input }) => {
-      // const title = input.title;
-      return { id: '3', title: 'Snens', isCompleted: true };
+    .input(
+      z.object({
+        rawValue: z.number().int(),
+        humidity: z.number().lte(999.999).gte(-999.999),
+      })
+    )
+    .mutation(async ({ input }) => {
+      // TODO: validate authentication
+      return db
+        .insert(sensorData)
+        .values({
+          rawValue: input.rawValue,
+          humidity: String(input.humidity),
+        })
+        .returning();
     }),
 });
