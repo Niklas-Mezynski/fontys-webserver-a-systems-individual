@@ -8,25 +8,28 @@ import {
   YAxis,
 } from 'recharts';
 import { trpc } from '../lib/trpc';
-
-// const data = [
-//   { date: new Date(2022, 0, 1), humidity: 10 },
-//   { date: new Date(2022, 0, 2), value: 20 },
-//   { date: new Date(2022, 0, 3), value: 15 },
-//   { date: new Date(2022, 0, 4), value: 25 },
-//   { date: new Date(2022, 0, 5), value: 30 },
-//   { date: new Date(2022, 0, 6), value: 20 },
-//   { date: new Date(2022, 0, 7), value: 15 },
-// ];
+import DataLoading from './utils/loading';
+import DataError from './utils/error';
 
 export default function SensorLineChart() {
-  const response = trpc.sensors.getSensorData.useQuery({ limit: 30 });
+  const response = trpc.sensors.getSensorData.useQuery(
+    { limit: 30 },
+    { retry: 3 }
+  );
 
   const data = response.data?.map((item) => ({
     date: new Date(item.createdAt),
     humidity: item.humidity,
     rawValue: item.rawValue,
   }));
+
+  if (response.isLoading) {
+    return <DataLoading />;
+  }
+
+  if (response.isError) {
+    return <DataError />;
+  }
 
   return (
     <LineChart width={600} height={400} data={data}>

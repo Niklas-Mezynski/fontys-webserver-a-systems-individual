@@ -19,8 +19,9 @@ export const sensorRouter = trpc.router({
         .from(sensorData)
         .orderBy(desc(sensorData.createdAt));
       if (input?.limit) {
-        query.limit(input?.limit);
+        query.limit(input.limit);
       }
+      return Promise.reject('Argus');
       return query;
     }),
   addSensorData: trpc.procedure
