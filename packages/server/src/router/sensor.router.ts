@@ -21,7 +21,12 @@ export const sensorRouter = trpc.router({
       if (input?.limit) {
         query.limit(input.limit);
       }
-      return query;
+
+      const result = await query;
+      return result.map((item) => ({
+        ...item,
+        humidity: +item.humidity,
+      }));
     }),
   addSensorData: trpc.procedure
     .input(
