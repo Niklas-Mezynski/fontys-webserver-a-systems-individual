@@ -17,6 +17,12 @@ export default function SensorLineChart() {
     { retry: 3 }
   );
 
+  const weatherResponse = trpc.weather.getWeatherData.useQuery(
+    { lat: 51.274346498083055, lon: 6.618441633154181 },
+    { retry: false }
+  );
+  console.log(weatherResponse.data?.current);
+
   const data = response.data?.map((item) => ({
     date: new Date(item.createdAt),
     humidity: item.humidity,

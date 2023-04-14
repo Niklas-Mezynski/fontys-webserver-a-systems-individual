@@ -14,5 +14,6 @@
   },
   "editor.codeActionsOnSave": {
     "source.organizeImports": false
-  }
+  },
+  "cSpell.words": ["WEATHERAPI"]
 }

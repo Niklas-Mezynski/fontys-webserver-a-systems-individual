@@ -1,4 +1,5 @@
 import {
+  index,
   integer,
   numeric,
   pgTable,
@@ -6,12 +7,18 @@ import {
   timestamp,
 } from 'drizzle-orm/pg-core';
 
-export const sensorData = pgTable('sensor_data', {
-  id: serial('id').primaryKey(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  rawValue: integer('raw_value').notNull(),
-  humidity: numeric('humidity', {
-    precision: 6,
-    scale: 3,
-  }).notNull(),
-});
+export const sensorData = pgTable(
+  'sensor_data',
+  {
+    id: serial('id').primaryKey(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    rawValue: integer('raw_value').notNull(),
+    humidity: numeric('humidity', {
+      precision: 6,
+      scale: 3,
+    }).notNull(),
+  },
+  (sensorData) => ({
+    createdAtIndex: index('created_at_index').on(sensorData.createdAt),
+  })
+);

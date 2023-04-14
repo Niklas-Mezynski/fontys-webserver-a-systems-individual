@@ -1,10 +1,10 @@
 import { trpc } from '../lib/trpc';
-import { sensorRouter } from './sensorRouter';
-import { todoRouter } from './todoRouter';
+import { sensorRouter } from './sensor.router';
+import { weatherRouter } from './weather.router';
 
 export const appRouter = trpc.router({
-  todo: todoRouter,
   sensors: sensorRouter,
+  weather: weatherRouter,
 });
 
 export type AppRouter = typeof appRouter;

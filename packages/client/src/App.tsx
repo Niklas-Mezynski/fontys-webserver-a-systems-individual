@@ -2,8 +2,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { httpBatchLink } from '@trpc/client';
 import { useState } from 'react';
 import './App.css';
-import AddTodo from './components/AddTodo';
-import ListTodos from './components/ListTodos';
 import SensorLineChart from './components/SensorLineChart';
 import { trpc } from './lib/trpc';
 
