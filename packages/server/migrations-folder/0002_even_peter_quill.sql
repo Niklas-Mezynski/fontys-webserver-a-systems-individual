@@ -1,0 +1,1 @@
+ALTER TABLE "sensor_data" ADD COLUMN "sensor_type" varchar(128) DEFAULT 'unknown' NOT NULL;

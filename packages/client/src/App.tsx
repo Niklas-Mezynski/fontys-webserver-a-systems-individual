@@ -2,13 +2,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { httpBatchLink } from '@trpc/client';
 import { useState } from 'react';
 import './App.css';
-import AddTodo from './components/AddTodo';
-import ListTodos from './components/ListTodos';
+import SensorLineChart from './components/SensorLineChart';
 import { trpc } from './lib/trpc';
+import WeatherInfo from './components/WeatherInfo';
 
 function App() {
-  console.log(import.meta.env);
-
   const [queryClient] = useState(() => new QueryClient());
   const [trpcClient] = useState(() => {
     return trpc.createClient({
@@ -23,15 +21,21 @@ function App() {
   return (
     <trpc.Provider queryClient={queryClient} client={trpcClient}>
       <QueryClientProvider client={queryClient}>
-        <div className="max-w-xl mx-auto">
-          <div className="text-center text-3xl font-bold text-gray-700">
-            <h1>Vite + React | Express | tRPC</h1>
-            <h3>npm workspaces</h3>
+        <div className="mx-auto flex flex-col items-center">
+          <div className="text-center text-3xl font-bold text-gray-700 my-4 lg:my-8">
+            <h1>Sensor data monitoring</h1>
           </div>
-          <div className="max-w-md mx-auto grid gap-y-4 mt-8">
-            <ListTodos />
-            <AddTodo />
-          </div>
+          <SensorLineChart
+            dataAttribute="humidity"
+            label="Humidity"
+            strokeColor="#845EC2"
+          />
+          <SensorLineChart
+            dataAttribute="rawValue"
+            label="Raw moisture value"
+            strokeColor="#FF6F91"
+          />
+          <WeatherInfo />
         </div>
       </QueryClientProvider>
     </trpc.Provider>

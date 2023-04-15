@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS "created_at_index" ON "sensor_data" ("created_at");
