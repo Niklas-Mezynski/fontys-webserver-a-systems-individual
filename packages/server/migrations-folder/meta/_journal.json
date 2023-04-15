@@ -13,6 +13,18 @@
       "version": "5",
       "when": 1681394911192,
       "tag": "0001_cuddly_the_executioner"
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1681563208898,
+      "tag": "0002_even_peter_quill"
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1681577283438,
+      "tag": "0003_polite_boomerang"
     }
   ]
 }

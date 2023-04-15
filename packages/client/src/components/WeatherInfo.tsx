@@ -36,21 +36,42 @@ export default function WeatherInfo({}: Props) {
       md:grid md:grid-cols-5 lg:gap-12
     "
     >
-      <NewFunction label="Temperature" value={`${data.current.temp_c}°C`} />
-      <NewFunction label="Humidity" value={`${data.current.humidity}%`} />
-      <NewFunction
+      <WeatherDataDisplay
+        label="Temperature"
+        value={`${data.current.temp_c}°C`}
+      />
+      <WeatherDataDisplay
+        label="Humidity"
+        value={`${data.current.humidity}%`}
+      />
+      <WeatherDataDisplay
         label="Precipitation"
         value={`${data.current.precip_mm}mm`}
       />
-      <NewFunction label="UV-Index" value={`${data.current.uv}`} />
-      <NewFunction label="Pressure" value={`${data.current.pressure_mb}mb`} />
-      <NewFunction label="Cloud cover" value={`${data.current.cloud}%`} />
-      <NewFunction label="Updated" value={`${data.current.last_updated}`} />
+      <WeatherDataDisplay label="UV-Index" value={`${data.current.uv}`} />
+      <WeatherDataDisplay
+        label="Pressure"
+        value={`${data.current.pressure_mb}mb`}
+      />
+      <WeatherDataDisplay
+        label="Cloud cover"
+        value={`${data.current.cloud}%`}
+      />
+      <WeatherDataDisplay
+        label="Updated"
+        value={`${data.current.last_updated}`}
+      />
     </div>
   );
 }
 
-function NewFunction({ label, value }: { label: string; value: string }) {
+function WeatherDataDisplay({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
   return (
     <div className="flex flex-col justify-evenly items-center">
       <span className="mb-2 text-lg text-center text-teal-600 font-semibold lg:text-xl">

@@ -5,6 +5,7 @@ import {
   pgTable,
   serial,
   timestamp,
+  varchar,
 } from 'drizzle-orm/pg-core';
 
 export const sensorData = pgTable(
@@ -17,6 +18,11 @@ export const sensorData = pgTable(
       precision: 6,
       scale: 3,
     }).notNull(),
+    sensorType: varchar('sensor_type', {
+      length: 128,
+    })
+      .notNull()
+      .default('unknown'),
   },
   (sensorData) => ({
     createdAtIndex: index('created_at_index').on(sensorData.createdAt),

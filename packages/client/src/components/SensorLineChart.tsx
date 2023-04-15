@@ -42,10 +42,12 @@ export default function SensorLineChart({
     return <DataError />;
   }
 
-  const data = response.data?.map((item) => ({
-    date: new Date(item.createdAt),
-    value: item[dataAttribute],
-  }));
+  const data = response.data
+    ?.map((item) => ({
+      date: new Date(item.createdAt),
+      value: item[dataAttribute],
+    }))
+    .sort((a, b) => a.date.getTime() - b.date.getTime());
 
   return (
     <LineChart
