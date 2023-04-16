@@ -8,8 +8,8 @@ import {
   YAxis,
 } from 'recharts';
 import { trpc } from '../lib/trpc';
-import DataLoading from './utils/loading';
-import DataError from './utils/error';
+import DataLoading from './utils/Loading';
+import DataError from './utils/Error';
 
 type Props = {};
 
@@ -30,38 +30,46 @@ export default function WeatherInfo({}: Props) {
   const data = response.data;
 
   return (
-    <div
-      className="my-2
+    <>
+      <span
+        className="mb-4 mt-8 text-xl text-center font-semibold lg:text-2xl"
+        text-2
+      >
+        Current Weather Data
+      </span>
+      <div
+        className="my-2
       grid grid-cols-3 gap-4
       md:grid md:grid-cols-5 lg:gap-12
     "
-    >
-      <WeatherDataDisplay
-        label="Temperature"
-        value={`${data.current.temp_c}°C`}
-      />
-      <WeatherDataDisplay
-        label="Humidity"
-        value={`${data.current.humidity}%`}
-      />
-      <WeatherDataDisplay
-        label="Precipitation"
-        value={`${data.current.precip_mm}mm`}
-      />
-      <WeatherDataDisplay label="UV-Index" value={`${data.current.uv}`} />
-      <WeatherDataDisplay
-        label="Pressure"
-        value={`${data.current.pressure_mb}mb`}
-      />
-      <WeatherDataDisplay
-        label="Cloud cover"
-        value={`${data.current.cloud}%`}
-      />
-      <WeatherDataDisplay
-        label="Updated"
-        value={`${data.current.last_updated}`}
-      />
-    </div>
+      >
+        <WeatherDataDisplay
+          label="Temperature"
+          value={`${data.current.temp_c}°C`}
+        />
+        <WeatherDataDisplay
+          label="Humidity"
+          value={`${data.current.humidity}%`}
+        />
+        <WeatherDataDisplay
+          label="Precipitation"
+          value={`${data.current.precip_mm}mm`}
+        />
+        <WeatherDataDisplay label="UV-Index" value={`${data.current.uv}`} />
+        <WeatherDataDisplay
+          label="Pressure"
+          value={`${data.current.pressure_mb}mb`}
+        />
+        <WeatherDataDisplay
+          label="Cloud cover"
+          value={`${data.current.cloud}%`}
+        />
+        <WeatherDataDisplay
+          label="Updated"
+          value={`${data.current.last_updated}`}
+        />
+      </div>
+    </>
   );
 }
 
