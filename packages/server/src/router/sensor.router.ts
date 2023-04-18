@@ -34,7 +34,7 @@ export const sensorRouter = trpc.router({
   addSensorData: trpc.procedure
     .input(
       z.object({
-        rawValue: z.number().int(),
+        rawValue: z.number(),
         humidity: z.number().lte(999.999).gte(-999.999),
         sensorType: z.string(),
       })
