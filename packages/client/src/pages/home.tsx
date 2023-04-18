@@ -21,7 +21,7 @@ function SensorSection() {
   //   type argus = inferAsyncReturnType<typeof trpc.sensors.getSensorData.useQuery>;
   const sensorResponse = trpc.sensors.getSensorData.useQuery(
     { limit: 30 },
-    { retry: 3 }
+    { retry: false, refetchInterval: 30000 }
   );
 
   if (sensorResponse.isLoading) {

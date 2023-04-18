@@ -7,9 +7,6 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { trpc } from '../lib/trpc';
-import DataLoading from './utils/Loading';
-import DataError from './utils/Error';
 
 type Props = {
   label: string;
@@ -27,10 +24,34 @@ export default function SensorLineChart({ label, data, strokeColor }: Props) {
       height={Math.min(screen.width * 0.65, 520)}
       data={data}
     >
-      <XAxis dataKey="date" />
+      <XAxis
+        dataKey="date"
+        tickFormatter={(value: Date) =>
+          value
+            .toLocaleString('de-DE', {
+              day: '2-digit',
+              month: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit',
+            })
+            .replace(',', '')
+        }
+      />
       <YAxis />
       <CartesianGrid stroke="#ccc" />
-      <Tooltip />
+      <Tooltip
+        labelFormatter={(label: Date) =>
+          label
+            .toLocaleString('de-DE', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+            })
+            .replace(',', '')
+        }
+      />
       <Legend />
       <Line
         type="monotone"
