@@ -7,6 +7,8 @@ import {
   timestamp,
   varchar,
 } from 'drizzle-orm/pg-core';
+import { weatherData } from './weather.data';
+import { InferModel } from 'drizzle-orm';
 
 export const sensorData = pgTable(
   'sensor_data',
@@ -23,8 +25,14 @@ export const sensorData = pgTable(
     })
       .notNull()
       .default('unknown'),
+    weatherId: integer('weather_id').references(() => weatherData.id, {
+      onDelete: 'cascade',
+    }),
   },
   (sensorData) => ({
     createdAtIndex: index('created_at_index').on(sensorData.createdAt),
   })
 );
+
+export type SensorData = InferModel<typeof sensorData>;
+export type NewSensorData = InferModel<typeof sensorData, 'insert'>;

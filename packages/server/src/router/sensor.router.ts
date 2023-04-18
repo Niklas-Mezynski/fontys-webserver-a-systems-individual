@@ -1,4 +1,4 @@
-import { desc } from 'drizzle-orm/expressions';
+import { desc, eq } from 'drizzle-orm/expressions';
 import { z } from 'zod';
 import { db } from '../db/db';
 import { sensorData } from '../db/schema/sensor.data';
@@ -18,8 +18,16 @@ export const sensorRouter = trpc.router({
     )
     .query(async ({ input }) => {
       const query = db
-        .select()
+        .select({
+          id: sensorData.id,
+          createdAt: sensorData.createdAt,
+          rawValue: sensorData.rawValue,
+          humidity: sensorData.humidity,
+          sensorType: sensorData.sensorType,
+          weather: weatherData,
+        })
         .from(sensorData)
+        .leftJoin(weatherData, eq(weatherData.id, sensorData.weatherId))
         .orderBy(desc(sensorData.createdAt));
       if (input?.limit) {
         query.limit(input.limit);
@@ -34,7 +42,7 @@ export const sensorRouter = trpc.router({
   addSensorData: trpc.procedure
     .input(
       z.object({
-        rawValue: z.number(),
+        rawValue: z.number().int(),
         humidity: z.number().lte(999.999).gte(-999.999),
         sensorType: z.string(),
       })
@@ -45,9 +53,7 @@ export const sensorRouter = trpc.router({
       const sensorType = input.sensorType.toUpperCase();
 
       // For each insert (on main Sensor), also save the current weather data
-      if (sensorType === 'MAIN') {
-        await WeatherService.insertCurrentWeatherDataToDB();
-      }
+      const weatherId = (await WeatherService.getLatestWeatherData())?.id;
 
       return db
         .insert(sensorData)
@@ -55,6 +61,7 @@ export const sensorRouter = trpc.router({
           rawValue: input.rawValue,
           humidity: String(input.humidity),
           sensorType: sensorType,
+          weatherId: weatherId,
         })
         .returning();
     }),
