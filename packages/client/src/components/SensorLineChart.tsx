@@ -7,58 +7,51 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { trpc } from '../lib/trpc';
-import DataLoading from './utils/loading';
-import DataError from './utils/error';
 
 type Props = {
-  dataAttribute: 'humidity' | 'rawValue';
   label: string;
+  data: {
+    date: Date;
+    value: number | string;
+  }[];
   strokeColor?: string;
 };
 
-export default function SensorLineChart({
-  dataAttribute,
-  label,
-  strokeColor,
-}: Props) {
-  const response = trpc.sensors.getSensorData.useQuery(
-    { limit: 30 },
-    { retry: 3 }
-  );
-
-  // const weatherResponse = trpc.weather.getWeatherData.useQuery(
-  //   { lat: 51.274346498083055, lon: 6.618441633154181 },
-  //   { retry: false }
-  // );
-
-  // console.log(weatherResponse.data?.current);
-
-  if (response.isLoading) {
-    return <DataLoading />;
-  }
-
-  if (response.isError) {
-    return <DataError />;
-  }
-
-  const data = response.data
-    ?.map((item) => ({
-      date: new Date(item.createdAt),
-      value: item[dataAttribute],
-    }))
-    .sort((a, b) => a.date.getTime() - b.date.getTime());
-
+export default function SensorLineChart({ label, data, strokeColor }: Props) {
   return (
     <LineChart
       width={Math.min(screen.width, 800)}
       height={Math.min(screen.width * 0.65, 520)}
       data={data}
     >
-      <XAxis dataKey="date" />
+      <XAxis
+        dataKey="date"
+        tickFormatter={(value: Date) =>
+          value
+            .toLocaleString('de-DE', {
+              day: '2-digit',
+              month: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit',
+            })
+            .replace(',', '')
+        }
+      />
       <YAxis />
       <CartesianGrid stroke="#ccc" />
-      <Tooltip />
+      <Tooltip
+        labelFormatter={(label: Date) =>
+          label
+            .toLocaleString('de-DE', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+            })
+            .replace(',', '')
+        }
+      />
       <Legend />
       <Line
         type="monotone"

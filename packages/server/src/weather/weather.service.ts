@@ -1,3 +1,5 @@
+import { db } from '../db/db';
+import { weatherData } from '../db/schema/weather.data';
 import { WeatherInfo } from './weather.interfaces';
 import axios from 'axios';
 
@@ -26,5 +28,25 @@ export class WeatherService {
       },
     });
     return response.data;
+  }
+
+  public static async insertCurrentWeatherDataToDB() {
+    const data = await this.getCurrentWeatherData({
+      lat: +process.env.LAT!,
+      lon: +process.env.LON!,
+    });
+    const result = await db
+      .insert(weatherData)
+      .values({
+        cloud: data.current.cloud,
+        humidity: data.current.humidity,
+        precipitation: data.current.precip_mm.toString(),
+        pressure: data.current.pressure_mb.toString(),
+        temperature: data.current.temp_c.toString(),
+        uvIndex: data.current.uv.toString(),
+        weatherMeasuredAt: new Date(data.current.last_updated),
+      })
+      .returning();
+    return result[0];
   }
 }

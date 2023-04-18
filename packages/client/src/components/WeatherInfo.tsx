@@ -1,67 +1,64 @@
-import {
-  CartesianGrid,
-  Legend,
-  Line,
-  LineChart,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
 import { trpc } from '../lib/trpc';
-import DataLoading from './utils/loading';
-import DataError from './utils/error';
+import DataError from './utils/Error';
+import DataLoading from './utils/Loading';
 
 type Props = {};
 
 export default function WeatherInfo({}: Props) {
-  const response = trpc.weather.getWeatherData.useQuery(
-    { lat: 51.274346498083055, lon: 6.618441633154181 },
-    { retry: false }
-  );
+  const response = trpc.weather.getWeatherData.useQuery(undefined, {
+    retry: false,
+  });
 
   if (response.isLoading) {
     return <DataLoading />;
   }
 
   if (response.isError) {
-    return <DataError />;
+    return (
+      <DataError
+        message="Error while loading Weather data"
+        details={response.error.message}
+      />
+    );
   }
 
   const data = response.data;
 
   return (
-    <div
-      className="my-2
+    <>
+      <span className="mb-4 mt-8 text-xl text-center font-semibold lg:text-2xl">
+        Current Weather Data
+      </span>
+      <div
+        className="my-2
       grid grid-cols-3 gap-4
       md:grid md:grid-cols-5 lg:gap-12
     "
-    >
-      <WeatherDataDisplay
-        label="Temperature"
-        value={`${data.current.temp_c}°C`}
-      />
-      <WeatherDataDisplay
-        label="Humidity"
-        value={`${data.current.humidity}%`}
-      />
-      <WeatherDataDisplay
-        label="Precipitation"
-        value={`${data.current.precip_mm}mm`}
-      />
-      <WeatherDataDisplay label="UV-Index" value={`${data.current.uv}`} />
-      <WeatherDataDisplay
-        label="Pressure"
-        value={`${data.current.pressure_mb}mb`}
-      />
-      <WeatherDataDisplay
-        label="Cloud cover"
-        value={`${data.current.cloud}%`}
-      />
-      <WeatherDataDisplay
-        label="Updated"
-        value={`${data.current.last_updated}`}
-      />
-    </div>
+      >
+        <WeatherDataDisplay
+          label="Temperature"
+          value={`${data.temperature}°C`}
+        />
+        <WeatherDataDisplay label="Humidity" value={`${data.humidity}%`} />
+        <WeatherDataDisplay
+          label="Precipitation"
+          value={`${data.precipitation}mm`}
+        />
+        <WeatherDataDisplay label="UV-Index" value={`${data.uvIndex}`} />
+        <WeatherDataDisplay label="Pressure" value={`${data.pressure}mb`} />
+        <WeatherDataDisplay label="Cloud cover" value={`${data.cloud}%`} />
+        <WeatherDataDisplay
+          label="Updated"
+          value={`${new Date(data.weatherMeasuredAt).toLocaleString('de-DE', {
+            day: '2-digit',
+            month: '2-digit',
+            year: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+          })}`}
+        />
+      </div>
+    </>
   );
 }
 
