@@ -54,6 +54,8 @@ function SensorSection() {
     value: item.rawValue,
   }));
 
+  console.log(data[0]);
+
   return (
     <>
       <span className="my-2">{`Current Humidity: ${
