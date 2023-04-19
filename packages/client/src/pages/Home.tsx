@@ -54,14 +54,13 @@ function SensorSection() {
     value: item.rawValue,
   }));
 
-  console.log(data[0]);
-
   return (
     <>
       <span className="my-2">{`Current Humidity: ${
         data.at(-1)?.humidity
       } Raw value: ${data.at(-1)?.rawValue} Last reading: ${(
-        (new Date().getTime() - data.at(-1)!.createdAt.getTime()) /
+        (new Date().getTime() -
+          (data.at(-1)?.createdAt.getTime() || new Date().getTime())) /
         60000
       ).toFixed(0)} min ago`}</span>
       <SensorLineChart

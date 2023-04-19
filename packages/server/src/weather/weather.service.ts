@@ -1,5 +1,6 @@
 import { db } from '../db/db';
 import { weatherData } from '../db/schema/weather.data';
+import { env } from '../utils/env.parser';
 import { WeatherInfo } from './weather.interfaces';
 import axios from 'axios';
 import { desc } from 'drizzle-orm/expressions';
@@ -10,9 +11,9 @@ interface QueryParams {
 }
 
 export class WeatherService {
-  private static API_KEY = process.env.WEATHERAPI_COM_API_KEY;
+  private static API_KEY = env.WEATHERAPI_COM_API_KEY;
 
-  private static API_URL = process.env.WEATHERAPI_URL;
+  private static API_URL = env.WEATHERAPI_URL;
 
   private static async getCurrentWeatherData(params: QueryParams) {
     if (!this.API_URL) {
@@ -33,8 +34,8 @@ export class WeatherService {
 
   private static async insertCurrentWeatherDataToDB() {
     const data = await this.getCurrentWeatherData({
-      lat: +process.env.LAT!,
-      lon: +process.env.LON!,
+      lat: env.LAT,
+      lon: env.LON,
     });
 
     const result = await db
@@ -61,7 +62,7 @@ export class WeatherService {
     if (
       latestWeatherData.length < 1 ||
       new Date().getTime() - latestWeatherData[0].createdAt.getTime() >
-        +(process.env.MINUTES_BETWEEN_WEATHER_FETCH || 5) * 60 * 1000 // (One hour)
+        env.MINUTES_BETWEEN_WEATHER_FETCH * 60 * 1000 // (One hour)
     ) {
       return WeatherService.insertCurrentWeatherDataToDB();
     }
