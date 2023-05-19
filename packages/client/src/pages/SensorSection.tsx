@@ -3,74 +3,113 @@ import DataError from '../components/utils/Error';
 import DataLoading from '../components/utils/Loading';
 import { trpc } from '../lib/trpc';
 
+const SENSOR_TYPES = ['FIRST', 'SECOND', 'THIRD'];
+
 function SensorSection() {
   //   type argus = inferAsyncReturnType<typeof trpc.sensors.getSensorData.useQuery>;
-  const sensorResponse = trpc.sensors.getSensorData.useQuery(
-    { limit: 30 },
+  const sensorCurrentResponse = trpc.sensors.getSensorData.useQuery(
+    { limit: 30, sensorTypes: SENSOR_TYPES },
     { retry: false, refetchInterval: 30000 }
   );
   const sensorAvgResponse = trpc.sensors.getSensorDataAveraged.useQuery(
-    { limit: 30 },
+    { limit: 30, sensorTypes: SENSOR_TYPES },
     { retry: false, refetchInterval: 30000 }
   );
 
-  if (sensorResponse.isLoading || sensorAvgResponse.isLoading) {
+  if (sensorCurrentResponse.isLoading || sensorAvgResponse.isLoading) {
     return <DataLoading />;
   }
 
-  if (sensorResponse.isError || sensorAvgResponse.isError) {
+  if (sensorCurrentResponse.isError || sensorAvgResponse.isError) {
     return (
       <DataError
         message="Error while loading sensor data"
-        details={`Sensor data: ${sensorResponse.error?.message} Sensor data averaged: ${sensorAvgResponse.error?.message}`}
+        details={`Sensor data: ${sensorCurrentResponse.error?.message} Sensor data averaged: ${sensorAvgResponse.error?.message}`}
       />
     );
   }
 
-  const data = sensorResponse
-    .data!.map((item) => ({
-      ...item,
-      createdAt: new Date(item.createdAt),
-    }))
-    .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+  const sensorCurrentTypes = sensorCurrentResponse.data?.map(
+    (item) => item.sensor
+  );
+  const sensorCurrentData: {
+    [x: string]: number | Date;
+    date: Date;
+  }[] = [];
 
-  const humidityData = data.map((item) => ({
-    date: new Date(item.createdAt),
-    value: item.humidity,
-  }));
+  if (sensorCurrentTypes?.length > 0) {
+    for (let i = sensorCurrentResponse.data[0].data.length - 1; i >= 1; i--) {
+      let dataPoint = {
+        date: new Date(sensorCurrentResponse.data[0].data[i].createdAt),
+        [sensorCurrentResponse.data[0].sensor]:
+          sensorCurrentResponse.data[0].data[i].humidity,
+      };
+      for (let j = 1; j < sensorCurrentTypes.length; j++) {
+        dataPoint[sensorCurrentResponse.data[j].sensor] =
+          sensorCurrentResponse.data[j].data[i].humidity;
+      }
+      sensorCurrentData.push(dataPoint);
+    }
+  }
 
-  const dataAvg = sensorAvgResponse
-    .data![0].data.map((item) => ({
-      ...item,
-      createdAt: new Date(item.createdAt),
-    }))
-    .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+  const sensorAvgTypes = sensorAvgResponse.data?.map((item) => item.sensor);
+  const sensorAvgData: {
+    [x: string]: number | Date;
+    date: Date;
+  }[] = [];
 
-  const humidityDataAvg = dataAvg.map((item) => ({
-    date: new Date(item.createdAt),
-    value: item.humidity,
-  }));
+  if (sensorAvgTypes?.length > 0) {
+    for (let i = sensorAvgResponse.data[0].data.length - 1; i >= 1; i--) {
+      let dataPoint = {
+        date: new Date(sensorAvgResponse.data[0].data[i].createdAt),
+        [sensorAvgResponse.data[0].sensor]:
+          sensorAvgResponse.data[0].data[i].humidity,
+      };
+      for (let j = 1; j < sensorAvgTypes.length; j++) {
+        dataPoint[sensorAvgResponse.data[j].sensor] =
+          sensorAvgResponse.data[j].data[i].humidity;
+      }
+      sensorAvgData.push(dataPoint);
+    }
+  }
+
+  const strokeColors = ['#845EC2', '#D65DB1', '#FF6F91', '#FF9671', '#FFC75F'];
+
+  const currentHumidityAvg =
+    (
+      SENSOR_TYPES.map((type) => sensorCurrentData[0]?.[type]) as number[]
+    ).reduce((p, c) => p + c, 0) / SENSOR_TYPES.length;
 
   return (
     <>
       <span className="my-2">
         {`Current Humidity: `}
-        <span className="font-bold">{`${data.at(-1)?.humidity}%`}</span>
+        <span className="font-bold">{`${currentHumidityAvg}%`}</span>
         {` Last reading: ${(
           (new Date().getTime() -
-            (data.at(-1)?.createdAt.getTime() || new Date().getTime())) /
+            (sensorCurrentData[0]?.date.getTime() || new Date().getTime())) /
           60000
         ).toFixed(0)} min ago`}
       </span>
       <SensorLineChart
-        data={humidityDataAvg}
-        label="Humidity long range"
-        strokeColor="#FF6F91"
+        data={sensorAvgData}
+        dataLineSpecs={
+          SENSOR_TYPES?.map((item, index) => ({
+            dataKey: item,
+            strokeColor: strokeColors[index],
+            label: `${item} long range`,
+          })) || []
+        }
       />
       <SensorLineChart
-        data={humidityData}
-        label="Humidity current development"
-        strokeColor="#845EC2"
+        data={sensorCurrentData}
+        dataLineSpecs={
+          SENSOR_TYPES.map((item, index) => ({
+            dataKey: item,
+            strokeColor: strokeColors[index],
+            label: `${item} current`,
+          })) || []
+        }
       />
     </>
   );
