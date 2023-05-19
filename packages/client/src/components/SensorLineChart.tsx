@@ -9,15 +9,21 @@ import {
 } from 'recharts';
 
 type Props = {
-  label: string;
+  dataLineSpecs: {
+    label: string;
+    dataKey: string;
+    strokeColor?: string;
+  }[];
   data: {
     date: Date;
-    value: number | string;
+    [x: string]: number | Date;
   }[];
-  strokeColor?: string;
 };
 
-export default function SensorLineChart({ label, data, strokeColor }: Props) {
+export default function SensorLineChart({ data, dataLineSpecs }: Props) {
+  console.log(dataLineSpecs);
+  console.log(data);
+
   return (
     <LineChart
       width={Math.min(screen.width, 800)}
@@ -53,12 +59,14 @@ export default function SensorLineChart({ label, data, strokeColor }: Props) {
         }
       />
       <Legend />
-      <Line
-        type="monotone"
-        dataKey="value"
-        name={label}
-        stroke={strokeColor || '#B3B388'}
-      />
+      {dataLineSpecs.map((lineSpec) => (
+        <Line
+          type="monotone"
+          dataKey={lineSpec.dataKey}
+          name={lineSpec.label}
+          stroke={lineSpec.strokeColor || '#B3B388'}
+        />
+      ))}
     </LineChart>
   );
 }
