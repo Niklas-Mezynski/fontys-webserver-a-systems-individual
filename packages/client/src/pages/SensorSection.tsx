@@ -77,37 +77,40 @@ function SensorSection() {
 
   const currentHumidityAvg =
     (
-      SENSOR_TYPES.map((type) => sensorCurrentData[0]?.[type]) as number[]
+      SENSOR_TYPES.map((type) => sensorCurrentData.at(-1)?.[type]) as number[]
     ).reduce((p, c) => p + c, 0) / SENSOR_TYPES.length;
 
   return (
     <>
       <span className="my-2">
         {`Current Humidity: `}
-        <span className="font-bold">{`${currentHumidityAvg}%`}</span>
+        <span className="font-bold">{`${currentHumidityAvg.toFixed(2)}%`}</span>
         {` Last reading: ${(
           (new Date().getTime() -
-            (sensorCurrentData[0]?.date.getTime() || new Date().getTime())) /
+            (sensorCurrentData.at(-1)?.date.getTime() ||
+              new Date().getTime())) /
           60000
         ).toFixed(0)} min ago`}
       </span>
       <SensorLineChart
+        title="Average Humidity (longer time range)"
         data={sensorAvgData}
         dataLineSpecs={
           SENSOR_TYPES?.map((item, index) => ({
             dataKey: item,
             strokeColor: strokeColors[index],
-            label: `${item} long range`,
+            label: item[0].toUpperCase() + item.slice(1).toLowerCase(),
           })) || []
         }
       />
       <SensorLineChart
+        title="Current Humidity development"
         data={sensorCurrentData}
         dataLineSpecs={
           SENSOR_TYPES.map((item, index) => ({
             dataKey: item,
             strokeColor: strokeColors[index],
-            label: `${item} current`,
+            label: item[0].toUpperCase() + item.slice(1).toLowerCase(),
           })) || []
         }
       />
