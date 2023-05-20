@@ -106,7 +106,7 @@ export const sensorRouter = trpc.router({
                     FROM sensor_data WHERE sensor_type = ${
                       sensorType.sensorType
                     }) sub
-              WHERE row_num % 12 = 0
+              WHERE row_num % 12 = 1
               ORDER BY created_at DESC
               LIMIT ${input?.limit || 'null'}`);
 
