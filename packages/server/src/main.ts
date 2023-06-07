@@ -6,6 +6,10 @@ import cors from 'cors';
 import express, { Application } from 'express';
 import { createContext } from './lib/trpc';
 import { appRouter } from './router';
+import { env } from './utils/env.parser';
+// import { TensorflowService } from './utils/tensorflow.service';
+
+// TensorflowService.predict([1, 2, 3, 4]);
 
 const app: Application = express();
 app.use(cors());
@@ -18,7 +22,7 @@ app.use(
   })
 );
 
-const PORT: number = Number(process.env.PORT) || 3000;
+const PORT: number = env.PORT;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on Port: ${PORT}`);
 });

@@ -1,12 +1,12 @@
-import { desc } from 'drizzle-orm/expressions';
+import { sql } from 'drizzle-orm';
+import { desc, eq, inArray } from 'drizzle-orm/expressions';
 import { z } from 'zod';
 import { db } from '../db/db';
-import { sensorData } from '../db/schema/sensor.data';
+import { SensorData, sensorData } from '../db/schema/sensor.data';
+import { weatherData } from '../db/schema/weather.data';
 import { trpc } from '../lib/trpc';
 import { verifyToken } from '../utils';
 import { WeatherService } from '../weather/weather.service';
-import { weatherData } from '../db/schema/weather.data';
-import { log } from 'console';
 
 export const sensorRouter = trpc.router({
   getSensorData: trpc.procedure
@@ -14,23 +14,111 @@ export const sensorRouter = trpc.router({
       z
         .object({
           limit: z.number().int().optional(),
+          sensorTypes: z.array(z.string()).optional().optional(),
         })
         .optional()
     )
     .query(async ({ input }) => {
-      const query = db
-        .select()
-        .from(sensorData)
-        .orderBy(desc(sensorData.createdAt));
-      if (input?.limit) {
-        query.limit(input.limit);
+      const sensorTypeQuery = db
+        .select({
+          sensorType: sql<
+            SensorData['sensorType']
+          >`DISTINCT sensor_type as "sensorType"`,
+        })
+        .from(sensorData);
+
+      if (input?.sensorTypes) {
+        sensorTypeQuery.where(
+          inArray(sensorData.sensorType, input.sensorTypes)
+        );
       }
 
-      const result = await query;
-      return result.map((item) => ({
-        ...item,
-        humidity: +item.humidity,
-      }));
+      const sensorTypes = await sensorTypeQuery;
+
+      return await Promise.all(
+        sensorTypes.map(async (sensorType) => {
+          const query = db
+            .select({
+              id: sensorData.id,
+              createdAt: sensorData.createdAt,
+              rawValue: sensorData.rawValue,
+              humidity: sensorData.humidity,
+              sensorType: sensorData.sensorType,
+              weather: weatherData,
+            })
+            .from(sensorData)
+            .leftJoin(weatherData, eq(weatherData.id, sensorData.weatherId))
+            .orderBy(desc(sensorData.createdAt));
+          if (input?.limit) {
+            query.limit(input.limit);
+          }
+          query.where(eq(sensorData.sensorType, sensorType.sensorType));
+
+          const result = await query;
+          return {
+            sensor: sensorType.sensorType,
+            data: result.map((item) => ({
+              ...item,
+              humidity: +item.humidity,
+            })),
+          };
+        })
+      );
+    }),
+  getSensorDataAveraged: trpc.procedure
+    .input(
+      z
+        .object({
+          limit: z.number().int().optional(),
+          sensorTypes: z.array(z.string()).optional().optional(),
+          skip: z.number().int().default(12),
+        })
+        .optional()
+    )
+    .query(async ({ input }) => {
+      const sensorTypeQuery = db
+        .select({
+          sensorType: sql<
+            SensorData['sensorType']
+          >`DISTINCT sensor_type as "sensorType"`,
+        })
+        .from(sensorData);
+
+      if (input?.sensorTypes) {
+        sensorTypeQuery.where(
+          inArray(sensorData.sensorType, input.sensorTypes)
+        );
+      }
+
+      const sensorTypes = await sensorTypeQuery;
+
+      return await Promise.all(
+        sensorTypes.map(async (sensorType) => {
+          const res = await db.execute<{
+            id: SensorData['id'];
+            createdAt: SensorData['createdAt'];
+            humidity: SensorData['humidity'];
+            sensorType: SensorData['sensorType'];
+          }>(sql`SELECT id, created_at as "createdAt", sensor_type as "sensorType", rolling_avg as "humidity"
+              FROM (SELECT *, 
+                          AVG(humidity) OVER (ORDER BY created_at ROWS BETWEEN 4 PRECEDING AND CURRENT ROW) AS rolling_avg,
+                          ROW_NUMBER() OVER (ORDER BY created_at DESC)                                      AS row_num
+                    FROM sensor_data WHERE sensor_type = ${
+                      sensorType.sensorType
+                    }) sub
+              WHERE row_num % 12 = 1
+              ORDER BY created_at DESC
+              LIMIT ${input?.limit || 'null'}`);
+
+          return {
+            sensor: sensorType.sensorType,
+            data: res.rows.map((item) => ({
+              ...item,
+              humidity: +item.humidity,
+            })),
+          };
+        })
+      );
     }),
   addSensorData: trpc.procedure
     .input(
@@ -40,31 +128,13 @@ export const sensorRouter = trpc.router({
         sensorType: z.string(),
       })
     )
-    .mutation(({ input, ctx }) => {
+    .mutation(async ({ input, ctx }) => {
       verifyToken(ctx.authKey);
 
       const sensorType = input.sensorType.toUpperCase();
 
       // For each insert (on main Sensor), also save the current weather data
-      if (sensorType === 'MAIN') {
-        WeatherService.getCurrentWeatherData({
-          lat: +process.env.LAT!,
-          lon: +process.env.LON!,
-        }).then(async (data) => {
-          db.insert(weatherData)
-            .values({
-              cloud: data.current.cloud,
-              humidity: data.current.humidity,
-              precipitation: data.current.precip_mm,
-              pressure: data.current.pressure_mb,
-              temperature: data.current.temp_c,
-              uvIndex: data.current.uv,
-              weatherMeasuredAt: new Date(data.current.last_updated),
-            } as any)
-            //TODO: figure out why type system is buggy
-            .execute();
-        });
-      }
+      const weatherId = (await WeatherService.getLatestWeatherData())?.id;
 
       return db
         .insert(sensorData)
@@ -72,6 +142,7 @@ export const sensorRouter = trpc.router({
           rawValue: input.rawValue,
           humidity: String(input.humidity),
           sensorType: sensorType,
+          weatherId: weatherId,
         })
         .returning();
     }),

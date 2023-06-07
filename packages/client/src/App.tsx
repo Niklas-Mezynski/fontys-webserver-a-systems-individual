@@ -3,7 +3,7 @@ import { httpBatchLink } from '@trpc/client';
 import { useState } from 'react';
 import './App.css';
 import { trpc } from './lib/trpc';
-import Home from './pages/home';
+import WeatherInfo from './components/WeatherInfo';
 
 function App() {
   const [queryClient] = useState(() => new QueryClient());

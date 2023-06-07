@@ -1,3 +1,4 @@
+import { InferModel } from 'drizzle-orm';
 import {
   index,
   integer,
@@ -38,3 +39,6 @@ export const weatherData = pgTable(
     ),
   })
 );
+
+export type WeatherData = InferModel<typeof weatherData>;
+export type NewWeatherData = InferModel<typeof weatherData, 'insert'>;
