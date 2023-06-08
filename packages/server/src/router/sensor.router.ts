@@ -8,6 +8,7 @@ import { trpc } from '../lib/trpc';
 import { verifyToken } from '../utils';
 import { WeatherService } from '../weather/weather.service';
 import { RegressionService } from '../utils/regression.service';
+import { env } from '../utils/env.parser';
 
 export const sensorRouter = trpc.router({
   getSensorData: trpc.procedure
@@ -203,7 +204,7 @@ function calcHoursUntilWatering(
   if (humidityChangeRate >= 0) {
     return -187420;
   }
-  const targetHumidity = 30;
+  const targetHumidity = env.HUMIDITY_WATERING_THRESHOLD;
   const targetTotalChange = targetHumidity - currentHumidity;
 
   return targetTotalChange / humidityChangeRate;

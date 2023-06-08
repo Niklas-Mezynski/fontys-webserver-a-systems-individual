@@ -9,6 +9,7 @@ const envVars = z.object({
   LAT: z.coerce.number(),
   LON: z.coerce.number(),
   MINUTES_BETWEEN_WEATHER_FETCH: z.coerce.number().int().positive(),
+  HUMIDITY_WATERING_THRESHOLD: z.coerce.number().positive().default(30),
 });
 
 export const env = envVars.parse(process.env);
