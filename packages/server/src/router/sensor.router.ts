@@ -7,6 +7,7 @@ import { weatherData } from '../db/schema/weather.data';
 import { trpc } from '../lib/trpc';
 import { verifyToken } from '../utils';
 import { WeatherService } from '../weather/weather.service';
+import { RegressionService } from '../utils/regression.service';
 
 export const sensorRouter = trpc.router({
   getSensorData: trpc.procedure
@@ -146,4 +147,64 @@ export const sensorRouter = trpc.router({
         })
         .returning();
     }),
+  getHumidityPrediction: trpc.procedure
+    .input(
+      z.object({
+        sensorTypes: z.array(z.string()),
+      })
+    )
+    .query(async ({ input: { sensorTypes } }) => {
+      // Get current weather data
+      const weatherData = await WeatherService.getLatestWeatherData();
+
+      // Get current sensor data
+      const latestSensorData = await db
+        .select({
+          createdAt: sensorData.createdAt,
+          humidity: sensorData.humidity,
+          sensorType: sensorData.sensorType,
+        })
+        .from(sensorData)
+        .where(inArray(sensorData.sensorType, sensorTypes))
+        .orderBy(desc(sensorData.createdAt))
+        .limit(sensorTypes.length);
+
+      // Get the average humidity for the latest sensor data
+      const avgHumidity =
+        latestSensorData.reduce((acc, curr) => acc + +curr.humidity, 0) /
+        latestSensorData.length;
+
+      // Predict humidity based on current weather data and average humidity
+      const prediction = await RegressionService.predictHumidityChange([
+        weatherData,
+      ]);
+
+      // Get the average prediction
+      const avgPrediction =
+        prediction.reduce((acc, curr) => acc + curr, 0) / prediction.length;
+
+      const timeUntilWatering = calcHoursUntilWatering(
+        avgHumidity,
+        avgPrediction
+      );
+
+      // Return the prediction
+      return {
+        avgPrediction,
+        timeUntilWatering,
+      };
+    }),
 });
+
+function calcHoursUntilWatering(
+  currentHumidity: number,
+  humidityChangeRate: number
+) {
+  if (humidityChangeRate >= 0) {
+    return -187420;
+  }
+  const targetHumidity = 30;
+  const targetTotalChange = targetHumidity - currentHumidity;
+
+  return targetTotalChange / humidityChangeRate;
+}

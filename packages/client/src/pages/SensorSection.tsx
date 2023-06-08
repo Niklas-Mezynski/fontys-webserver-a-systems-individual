@@ -3,7 +3,7 @@ import DataError from '../components/utils/Error';
 import DataLoading from '../components/utils/Loading';
 import { trpc } from '../lib/trpc';
 
-const SENSOR_TYPES = ['FIRST', 'SECOND', 'THIRD'];
+const SENSOR_TYPES = ['FIRST', 'THIRD'];
 
 function SensorSection() {
   //   type argus = inferAsyncReturnType<typeof trpc.sensors.getSensorData.useQuery>;
