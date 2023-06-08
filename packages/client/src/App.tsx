@@ -3,6 +3,7 @@ import { httpBatchLink } from '@trpc/client';
 import { useState } from 'react';
 import './App.css';
 import { trpc } from './lib/trpc';
+import WeatherInfo from './components/WeatherInfo';
 import Home from './pages/Home';
 
 function App() {

@@ -22,9 +22,6 @@ type Props = {
 };
 
 export default function SensorLineChart({ data, dataLineSpecs, title }: Props) {
-  console.log(dataLineSpecs);
-  console.log(data);
-
   return (
     <>
       <h2 className="text-2xl mb-1 mt-3">{title}</h2>
