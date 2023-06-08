@@ -1,4 +1,5 @@
 import WeatherInfo from '../components/WeatherInfo';
+import PredictionSection from '../components/utils/PredictionSection';
 import SensorSection from './SensorSection';
 
 export default function Home() {
@@ -7,6 +8,7 @@ export default function Home() {
       <div className="text-center text-3xl font-bold text-gray-700 my-4 lg:my-8">
         <h1>Sensor data monitoring</h1>
       </div>
+      <PredictionSection />
       <SensorSection />
       <WeatherInfo />
     </div>
